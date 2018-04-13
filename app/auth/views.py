@@ -83,7 +83,7 @@ def choose_stu():
                 stu_list = request.form.getlist('checked')
 
                 class_list = session['classes']
-                print class_list
+                print(class_list)
                 chosen_class_stu = []  # 获取除全选外选中班级的所有学生
                 for m in stu(class_list).values():
                     for n in m:

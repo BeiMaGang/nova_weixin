@@ -2,4 +2,4 @@
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 
-__all__ = ['config']
+__all__ = ['manage']
