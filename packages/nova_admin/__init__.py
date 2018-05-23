@@ -1,4 +1,4 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 from __future__ import absolute_import

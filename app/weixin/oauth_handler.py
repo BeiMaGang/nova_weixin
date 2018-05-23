@@ -1,15 +1,15 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 import time
 
-from nova_weixin.app.weixin.weixinconfig import APP_ID, SECRET
-from nova_weixin.app.nova.get_user_info import get_stuid
-from nova_weixin.packages.novamysql import select_one, update, select_int, select
+from nova_weixin.app.config import APP_ID, SECRET
 from nova_weixin.packages.nova_wxsdk import WxApiUrl, CommunicateWithApi
 from nova_weixin.packages.novalog import NovaLog
+# from nova_weixin.packages.novamysql import select_one, update, select_int, select
+# from nova_weixin.app.nova.get_user_info import get_stuid
 
-log = NovaLog('log/db_operation.log')
+log = NovaLog('log/db_operation')
 
 
 def get_openid_from_code(code):
@@ -34,80 +34,85 @@ def get_openid_from_code(code):
     return result['openid']
 
 
-def get_url(nid):
-    return select_int('select url from notecontent where nid=?',nid)
-
-
-def jiaowu(openid):
-    stuid = get_stuid(openid)
-    if not stuid:
-        return -1
-    info = select_one('select email,status from stuinfo where stuid=?', stuid)
-
-    if info:
-        info['stuid'] = stuid
-        return info
-    else:
-        log.warn("unable to get {stuid}'s email status")
-        return -1
-
-def jiaowu_save(stuid,email,status):
-    result = update('update stuinfo set email = ?, status = ? where stuid = ?', email, status, stuid)
-
-    if result == 1:
-        return 1
-    else:
-        log.warn("unable to update {stuid}'s email to '{email}'".format(stuid=stuid, email=email))
-        return -1
-
-def openid_handler(openid, nid):
-    """
-    update the mysql database using openid and post_url
-    :param openid: openid of the user who read the specific article
-    :param nid: the number of the article
-    :return: return the result of the mysql's update
-    """
-    stuid = get_stuid(openid)
-    read = int(time.time())
-
-    read_info = select_one('select * from noteresponse where nID =?', nid)
-    earliest = read_info['earlistread']
-    read_id = read_info['readlist'].split(",")[:-1]  # "a list"
-    read_time = read_info['readtime']
-    read_pop = read_info['readpop']
-    if earliest == 0:
-        earliest = read
-    latest = read
-    if str(stuid) not in read_id:
-        read_id.append(str(stuid))
-        read_id = ','.join(read_id) + ','   #a string
-        read_pop = read_pop + 1
-
-    read_time = read_time + str(stuid) + ':' + str(read) + ','
-    result = update('update noteresponse set readList=?,readtime=?,earlistread=?,latestread=?,readpop=? where nid=?',
-                    read_id, read_time, earliest, latest, read_pop, nid)
-
-    if result == 1:
-        return 1
-    else:
-        log.warn("unable to upate noteresponse")
-        return -1
-
-
-def history_articles(stuid):
-    send_info = select("select nid,stuids from noteindex")
-
-    if not send_info:
-        return None
-
-    nids = [i['nid'] for i in send_info if str(stuid) in i['stuids']]
-
-    articles = []
-    article_dict = dict()
-    article_dict['articles'] = dict()
-    for x in nids:
-        re = select_one('select nid,title,url from notecontent where nid =?', x)
-        if re is None:
-            continue
-        articles.append([re['nid'], re['title'], re['url']])
-    return articles
+# def get_url(nid):
+#     return select_int('select url from notecontent where nid=?', nid)
+#
+#
+# def jiaowu(openid):
+#     stuid = get_stuid(openid)
+#     if not stuid:
+#         return -1
+#     info = select_one('select email,status from stuinfo where stuid=?', stuid)
+#
+#     if info:
+#         info['stuid'] = stuid
+#         return info
+#     else:
+#         log.warning("unable to get {stuid}'s email status")
+#         return -1
+#
+#
+# def jiaowu_save(stuid, email, status):
+#     result = update('update stuinfo set email = ?, status = ? where stuid = ?', email, status,
+#                     stuid)
+#
+#     if result == 1:
+#         return 1
+#     else:
+#         log.warning(
+#             "unable to update {stuid}'s email to '{email}'".format(stuid=stuid, email=email))
+#         return -1
+#
+#
+# def openid_handler(openid, nid):
+#     """
+#     update the mysql database using openid and post_url
+#     :param openid: openid of the user who read the specific article
+#     :param nid: the number of the article
+#     :return: return the result of the mysql's update
+#     """
+#     stuid = get_stuid(openid)
+#     read = int(time.time())
+#
+#     read_info = select_one('select * from noteresponse where nID =?', nid)
+#     earliest = read_info['earlistread']
+#     read_id = read_info['readlist'].split(",")[:-1]  # "a list"
+#     read_time = read_info['readtime']
+#     read_pop = read_info['readpop']
+#     if earliest == 0:
+#         earliest = read
+#     latest = read
+#     if str(stuid) not in read_id:
+#         read_id.append(str(stuid))
+#         read_id = ','.join(read_id) + ','  # a string
+#         read_pop = read_pop + 1
+#
+#     read_time = read_time + str(stuid) + ':' + str(read) + ','
+#     result = update(
+#         'update noteresponse set readList=?,readtime=?,earlistread=?,latestread=?,readpop=? where nid=?',
+#         read_id, read_time, earliest, latest, read_pop, nid)
+#
+#     if result == 1:
+#         return 1
+#     else:
+#         log.warning("unable to upate noteresponse")
+#         return -1
+#
+#
+# def history_articles(stuid):
+#     send_info = select("select nid,stuids from noteindex")
+#
+#     if not send_info:
+#         return None
+#
+#     nids = [i['nid'] for i in send_info if str(stuid) in i['stuids']]
+#
+#     articles = []
+#     article_dict = dict()
+#     article_dict['articles'] = dict()
+#     for x in nids:
+#         re = select_one('select nid,title,url from notecontent where nid =?', x)
+#         if re is None:
+#             continue
+#         articles.append([re['nid'], re['title'], re['url']])
+#     return articles

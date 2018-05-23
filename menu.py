@@ -1,4 +1,4 @@
-# -*- coding:utf8 -*- 
+# -*- coding: utf-8 -*- 
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 """
@@ -13,7 +13,7 @@ if PY2:
     reload(sys)
     sys.setdefaultencoding('utf8')
 
-from nova_weixin.app.weixin.weixinconfig import MENU, APP_ID, SECRET
+from nova_weixin.app.config import MENU, APP_ID, SECRET
 from nova_weixin.packages.nova_wxsdk import WxApiUrl, CommunicateWithApi, get_token
 
 
@@ -22,7 +22,8 @@ def create_menu():
     if acc_token['status'] == 1:
         url = WxApiUrl.create_menu.format(access_token=acc_token['acc_token'])
         data = MENU
-        return CommunicateWithApi.post_data(url, data=json.dumps(data, ensure_ascii=False).encode('utf8'))
+        return CommunicateWithApi.post_data(url, data=json.dumps(data, ensure_ascii=False).encode(
+            'utf8'))
     else:
         return -1
 

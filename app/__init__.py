@@ -1,4 +1,4 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 import os
@@ -6,9 +6,10 @@ import os
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
-from nova_weixin.app.config import (config, DB_HOSTNAME, DB_PASSWORD,
-                                    DB_USERNAME, DB_NAME, DB_PORT)
-from nova_weixin.packages.novamysql import create_engine
+from novamysql import engine
+# from novamysql import create_engine
+from .config import (config, DB_HOSTNAME, DB_PASSWORD,
+                     DB_USERNAME, DB_NAME, DB_PORT)
 
 bootstrap = Bootstrap()
 moment = Moment()
@@ -22,10 +23,19 @@ def create_app(config_name):
 
     if not os.path.exists('./log'):
         os.mkdir('./log')
-    create_engine(DB_USERNAME, DB_PASSWORD, DB_NAME, DB_HOSTNAME, DB_PORT)
+    app.config['SQLALCHEMY_DATABASE_URI'] = \
+        "mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset=utf8".format(
+            user=DB_USERNAME, password=DB_PASSWORD, host=DB_HOSTNAME,
+            port=DB_PORT, database=DB_NAME)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    engine.init_app(app)
+    engine.create_all(app=app)
+    # create_engine(DB_USERNAME, DB_PASSWORD, DB_NAME, DB_HOSTNAME, DB_PORT)
     bootstrap.init_app(app)
     moment.init_app(app)
 
+    from .bind import bind as bind_blueprint
+    app.register_blueprint(bind_blueprint, url_prefix='/bind')
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint, url_prefix='/main')
 
@@ -34,8 +44,5 @@ def create_app(config_name):
 
     from .weixin import weixin as weixin_blueprint
     app.register_blueprint(weixin_blueprint)
-
-    from .bind import bind as bind_blueprint
-    app.register_blueprint(bind_blueprint, url_prefix='/bind')
 
     return app

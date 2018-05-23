@@ -1,4 +1,4 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 from nova_weixin.app.config import ADDRESS
@@ -24,14 +24,14 @@ MENU = {
                     "url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
                            "&redirect_uri=%s"
                            "/history&response_type=code&scope=snsapi_base&state=123&connect_redirect=1#wechat_redirect"
-                           % (APP_ID,ADDRESS)
-                }#,
+                           % (APP_ID, ADDRESS)
+                }  # ,
                 # {
                 #     "type": "click",
                 #     "name": "近期消息",
                 #     "key": "recent_mes"
                 # }
-                ]
+            ]
 
         },
         {
@@ -73,7 +73,7 @@ MENU = {
                     "url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
                            "&redirect_uri=%s"
                            "/jiaowu&response_type=code&scope=snsapi_base&state=123&connect_redirect=1#wechat_redirect"
-                           % (APP_ID,ADDRESS)
+                           % (APP_ID, ADDRESS)
                 }
             ]
 

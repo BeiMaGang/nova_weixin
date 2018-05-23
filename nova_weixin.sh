@@ -10,11 +10,10 @@ apt-get install -y python-pip
 apt-get install -y python-virtualenv
 apt-get install -y mysql-server mysql-client
 cd /home && mkdir www && cd www && mkdir wechat && cd wechat
-virtualenv env
+virtualenv venv
 git clone https://github.com/imndszy/nova_weixin.git
-source env/bin/activate
+source venv/bin/activate
 pip install -r nova_weixin/requirements.txt
-pip install uwsgi
 deactivate
 # 至此，基本软件的安装已经完成，接下来需进行相关软件的配置，包括uwsgi, supervisor, nginx，详见 http://blog.csdn.net/imjtrszy/article/details/53306260
 # mysql需要新增用户进行权限管理，参见 http://blog.csdn.net/imjtrszy/article/details/53190300

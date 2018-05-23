@@ -1,7 +1,8 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 from flask import render_template
+
 from nova_weixin.app.main import main
 
 

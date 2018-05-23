@@ -1,6 +1,7 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
+
 
 class WxApiUrl(object):
     # 微信ip地址列表
@@ -15,7 +16,7 @@ class WxApiUrl(object):
     delete_menu = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token={access_token}"
     get_current_menu = "https://api.weixin.qq.com/cgi-bin/get_current_selfmenu_info?access_token={access_token}"
 
-    #消息管理
+    # 消息管理
     add_staff = "https://api.weixin.qq.com/customservice/kfaccount/add?access_token={access_token}"
     update_staff = "https://api.weixin.qq.com/customservice/kfaccount/update?access_token={access_token}"
     delete_staff = "https://api.weixin.qq.com/customservice/kfaccount/del?access_token={access_token}"
@@ -52,7 +53,7 @@ class WxApiUrl(object):
     media_count = "https://api.weixin.qq.com/cgi-bin/material/get_materialcount?access_token={access_token}"
     media_list = "https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token={access_token}"
 
-    #用户管理模块
+    # 用户管理模块
     create_group = "https://api.weixin.qq.com/cgi-bin/groups/create?access_token={access_token}"
     get_groups = "https://api.weixin.qq.com/cgi-bin/groups/get?access_token={access_token}"
     get_id = "https://api.weixin.qq.com/cgi-bin/groups/getid?access_token={access_token}"
@@ -65,8 +66,7 @@ class WxApiUrl(object):
     batch_get_userinfo = "https://api.weixin.qq.com/cgi-bin/user/info/batchget?access_token={access_token}"
     get_userlist = "https://api.weixin.qq.com/cgi-bin/user/get?access_token={access_token}&next_openid=%s"
 
-
-    #帐号管理
+    # 帐号管理
     create_qrcode = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token={access_token}"
     download_qrcode = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={ticket}"
     get_shorturl = "https://api.weixin.qq.com/cgi-bin/shorturl?access_token={access_token}"

@@ -1,4 +1,4 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 """
@@ -7,56 +7,84 @@
 
 """
 import time
+from urllib.parse import unquote
 from flask import make_response
-from nova_weixin.app.weixin.msg_format import *
-from nova_weixin.app.nova.get_user_info import get_stuid, Student
-from nova_weixin.app.config import ADDRESS
-from nova_weixin.app.weixin.weixinconfig import APP_ID
-from nova_weixin.packages.novamysql import insert, update, select
-from nova_weixin.packages.nova_wxsdk import WxApiUrl
-from nova_weixin.packages.novalog import NovaLog
 
+# from nova_weixin.app.config import ADDRESS
+# from nova_weixin.app.nova.get_user_info import get_stuid, Student
+# from nova_weixin.app.weixin.msg_format import *
+from wechatAccAPI import MsgFormat, Communicate
+from packages.novalog import NovaLog
+from novamysql import ServiceStatusForm, dbsession
 person_info_key = ['daily_assess', 'gpa', 'recom', 'tutor']
 mes_key = ['not_read_mes', 'history_mes']
 
-log = NovaLog('log/db_operation.log')
+log = NovaLog('log/db_operation')
 
-def __save_into_database(content, openid):
-    stuid = get_stuid(openid)
-    result = insert('queryrecord', keyword=content, time=int(time.time()), username=stuid, describe='')
 
-    if result == 1:
-        return 0
-    else:
-        return -1
-
+# def __save_into_database(content, openid):
+#     stuid = get_stuid(openid)
+#     result = insert('queryrecord', keyword=content, time=int(time.time()), username=stuid,
+#                     describe='')
+#
+#     if result == 1:
+#         return 0
+#     else:
+#         return -1
 
 def handle_msg(msg):
     if msg['MsgType'] == 'text':
         try:
-            __save_into_database(msg['Content'], msg['FromUserName'])
+            return __res_text_msg(msg, __handle_text(msg))
+            # __save_into_database(msg['Content'], msg['FromUserName'])
         except:
             pass
-        finally:
-            return ""
 
     if msg['MsgType'] == 'event':
-        if msg['Event'] == 'CLICK' and msg['EventKey'] == 'not_read_mes':
-            return __handle_mes_key(msg)
+        # if msg['Event'] == 'CLICK' and msg['EventKey'] == 'not_read_mes':
+        #     return __handle_mes_key(msg)
         return __res_text_msg(msg, __handle_event(msg))
+
+
+def __handle_text(msg):
+    msg_text = msg['Content']
+    openid = msg['FromUserName']
+    if len(ServiceStatusForm.query.filter_by(openid=openid).all()) == 0:
+        dbsession.add(ServiceStatusForm(openid=openid, on_service=False))
+    that_row = ServiceStatusForm.query.filter_by(openid=openid).first()
+
+    if '客服' == str(msg_text):
+        that_row.on_service = True
+        reply = "您已进入智能客服系统，如果要退出该系统，请发送\"退出客服\""
+    elif '退出客服' == str(msg_text):
+        that_row.on_service = False
+        reply = "您已退出智能客服系统"
+
+    elif that_row.on_service:
+        reply = "测试客服"
+    else:
+        params = {
+            'q': msg_text,
+            'anid': openid
+        }
+        reply = unquote(Communicate.get("http://www.xiaobing.tk/chat.php", params=params)
+                        ['InstantMessage']['ReplyText'])
+    dbsession.commit()
+    return reply
 
 
 def __handle_event(msg):
     if msg['Event'] == 'subscribe':
-        if msg['EventKey']:
-            stuid = msg['EventKey'][8:]
-            openid = msg['FromUserName']
-            result = update('update biding set openid = ? where stuid = ?', openid, stuid)
-
-            if result != 1:
-                log.critical("unable bide openid={openid} and stuid={stuid}".format(openid=openid, stuid=stuid))
-            return "您已成功关注工程管理！"
-        return "感谢关注！"
+        # if msg['EventKey']:
+        #     stuid = msg['EventKey'][8:]
+        #     openid = msg['FromUserName']
+        #     result = update('update biding set openid = ? where stuid = ?', openid, stuid)
+        #
+        #     if result != 1:
+        #         log.critical("unable bide openid={openid} and stuid={stuid}".format(openid=openid,
+        #                                                                             stuid=stuid))
+        #     return "您已成功关注工程管理！"
+        return "感谢关注南京大学智能数据决策工作室公众号！！"
 
     if msg['Event'] == 'SCAN':
         return "您已成功再次关注…然而并没有什么用～"
@@ -64,160 +92,159 @@ def __handle_event(msg):
     if msg['Event'] == 'unsubscribe':
         return ""
 
-    if msg['Event'] == 'CLICK' and msg['EventKey'] in person_info_key:
-        stu = Student(msg['FromUserName'])
-
-        if msg['EventKey'] == person_info_key[0]:  # 日常行为考核
-            rout = stu.get_routine_appraise()
-            if isinstance(rout, dict):
-                content = '总分: ' + str(stu.routine) + '\n基础考核项: ' \
-                          + str(stu.routine_base) + '\n鼓励参与项: ' \
-                          + str(stu.routine_encou) + '\n成果奖励项: ' \
-                          + str(stu.routine_develop) + '\n排名:' + \
-                          str(stu.routine_rank)
-            else:
-                content = rout
-            return content
-
-        if msg['EventKey'] == person_info_key[1]:  # gpa查询
-            gpa = stu.get_gpa()
-            if isinstance(gpa, dict):
-                your_gpa = str(stu.gpa)
-                your_gpa_rank = str(stu.gpa_rank)
-                rank_percent = str(round(float(stu.gpa_rank) / gpa['max'] * 100, 2)) + '%'
-                if gpa.get('nonnext'):
-                    your_next_gpa = gpa['next']
-                else:
-                    your_next_gpa = str(round(gpa['next'], 4))
-
-                if gpa.get('nonprev'):
-                    your_prev_gpa = gpa['prev']
-                else:
-                    your_prev_gpa = str(round(gpa['prev'], 4))
-
-                your_first_gpa = str(round(gpa['first'], 4))
-
-                content = 'GPA: ' + your_gpa + '\nRank: ' + your_gpa_rank \
-                          + '\n您位于' + rank_percent + \
-                          '\n前一名的绩点: ' + your_prev_gpa + '\n后一名的绩点: ' \
-                          + your_next_gpa + '\n第一名的绩点: ' \
-                          + your_first_gpa
-            else:
-                content = gpa
-            return content
-
-        if msg['EventKey'] == person_info_key[2]:  # 推免查询
-            gpa = stu.get_recom()
-            if isinstance(gpa, dict):
-                your_gpa = str(stu.gpa)
-                your_gpa_rank = str(stu.gpa_rank)
-                rank_percent = str(round(float(stu.gpa_rank) / gpa['max'] * 100, 2)) + '%'
-                if gpa.get('nonnext'):
-                    your_next_gpa = gpa['next']
-                else:
-                    your_next_gpa = str(round(gpa['next'], 4))
-
-                if gpa.get('nonprev'):
-                    your_prev_gpa = gpa['prev']
-                else:
-                    your_prev_gpa = str(round(gpa['prev'], 4))
-                your_first_gpa = str(round(gpa['first'], 4))
-                twenty_per_gpa = str(round(gpa['twenty_per'], 4))
-                content = '总GPA排名\n' + '*' * 22 + '\nGPA: ' + your_gpa \
-                          + '\nRank: ' + your_gpa_rank + '\n您位于' \
-                          + rank_percent + '\n前一名的绩点: ' + your_prev_gpa \
-                          + '\n后一名的绩点: ' + your_next_gpa \
-                          + '\n第一名的绩点: ' + your_first_gpa + '\n排名20%的GPA:' + twenty_per_gpa
-            else:
-                content = gpa
-            return content
-
-        if msg['EventKey'] == person_info_key[3]:  # 导师查询
-            tutor = stu.get_tutor()
-            if isinstance(tutor, dict):
-                if tutor['status']:
-                    content = '您的导师是: ' + stu.tutor \
-                              + '\nemail:' + stu.tutor_mail \
-                              + '\n' + '=' * 18 + '\n'
-                    if tutor['same_tutor']:
-                        content = content + '导师与您相同的有:\n\n'
-                        info_list = []
-                        for i in tutor['same_tutor']:
-                            info_list.append(i['name'] + ' ' +
-                                             i['sex'] +
-                                             '\n宿舍: ' +
-                                             i['campus'])
-                        content = content + '\n\n'.join(info_list)
-                    else:
-                        content = content + '没有人和您有相同导师！'
-                else:
-                    content = '您当前没有导师！'
-            else:
-                content = tutor
-            return content
-
-
-def __handle_mes_key(msg, count=False, stu=False): # 未读消息处理
-    if stu:
-        stuid = msg
-    else:
-        stuid = get_stuid(msg['FromUserName'])
-
-    send_info = select('select nid,stuids from noteindex')
-    if not send_info:
-        return ''
-
-    # 发送给某学生的所有消息
-    send = [j['nid'] for j in send_info if str(stuid) in j['stuids']]
-    if not send:
-        return ''
-
-    read_info = select('select nid,readlist from noteresponse')
-    if not read_info:
-        return ''
-
-    # 该学生已读的所有消息
-    read = [i['nid'] for i in read_info if str(stuid) in i['readlist']]
-
-    not_read = list(set(send)-set(read))
-    if not not_read:
-        return ''
-
-    send_content = select('select nid,title,picurl,url from notecontent order by nid desc limit 100')
-
-    if count:
-        temp = []
-        for x in send_content:
-            if x['nid'] in not_read:
-                temp.append({'title': x['title'], 'url': x['url']})
-        return {'read': len(read),
-                'not_read': len(not_read),
-                'not_read_content': temp}
+    # if msg['Event'] == 'CLICK' and msg['EventKey'] in person_info_key:
+    #     stu = Student(msg['FromUserName'])
+    #
+    #     if msg['EventKey'] == person_info_key[0]:  # 日常行为考核
+    #         rout = stu.get_routine_appraise()
+    #         if isinstance(rout, dict):
+    #             content = '总分: ' + str(stu.routine) + '\n基础考核项: ' \
+    #                       + str(stu.routine_base) + '\n鼓励参与项: ' \
+    #                       + str(stu.routine_encou) + '\n成果奖励项: ' \
+    #                       + str(stu.routine_develop) + '\n排名:' + \
+    #                       str(stu.routine_rank)
+    #         else:
+    #             content = rout
+    #         return content
+    #
+    #     if msg['EventKey'] == person_info_key[1]:  # gpa查询
+    #         gpa = stu.get_gpa()
+    #         if isinstance(gpa, dict):
+    #             your_gpa = str(stu.gpa)
+    #             your_gpa_rank = str(stu.gpa_rank)
+    #             rank_percent = str(round(float(stu.gpa_rank) / gpa['max'] * 100, 2)) + '%'
+    #             if gpa.get('nonnext'):
+    #                 your_next_gpa = gpa['next']
+    #             else:
+    #                 your_next_gpa = str(round(gpa['next'], 4))
+    #
+    #             if gpa.get('nonprev'):
+    #                 your_prev_gpa = gpa['prev']
+    #             else:
+    #                 your_prev_gpa = str(round(gpa['prev'], 4))
+    #
+    #             your_first_gpa = str(round(gpa['first'], 4))
+    #
+    #             content = 'GPA: ' + your_gpa + '\nRank: ' + your_gpa_rank \
+    #                       + '\n您位于' + rank_percent + \
+    #                       '\n前一名的绩点: ' + your_prev_gpa + '\n后一名的绩点: ' \
+    #                       + your_next_gpa + '\n第一名的绩点: ' \
+    #                       + your_first_gpa
+    #         else:
+    #             content = gpa
+    #         return content
+    #
+    #     if msg['EventKey'] == person_info_key[2]:  # 推免查询
+    #         gpa = stu.get_recom()
+    #         if isinstance(gpa, dict):
+    #             your_gpa = str(stu.gpa)
+    #             your_gpa_rank = str(stu.gpa_rank)
+    #             rank_percent = str(round(float(stu.gpa_rank) / gpa['max'] * 100, 2)) + '%'
+    #             if gpa.get('nonnext'):
+    #                 your_next_gpa = gpa['next']
+    #             else:
+    #                 your_next_gpa = str(round(gpa['next'], 4))
+    #
+    #             if gpa.get('nonprev'):
+    #                 your_prev_gpa = gpa['prev']
+    #             else:
+    #                 your_prev_gpa = str(round(gpa['prev'], 4))
+    #             your_first_gpa = str(round(gpa['first'], 4))
+    #             twenty_per_gpa = str(round(gpa['twenty_per'], 4))
+    #             content = '总GPA排名\n' + '*' * 22 + '\nGPA: ' + your_gpa \
+    #                       + '\nRank: ' + your_gpa_rank + '\n您位于' \
+    #                       + rank_percent + '\n前一名的绩点: ' + your_prev_gpa \
+    #                       + '\n后一名的绩点: ' + your_next_gpa \
+    #                       + '\n第一名的绩点: ' + your_first_gpa + '\n排名20%的GPA:' + twenty_per_gpa
+    #         else:
+    #             content = gpa
+    #         return content
+    #
+    #     if msg['EventKey'] == person_info_key[3]:  # 导师查询
+    #         tutor = stu.get_tutor()
+    #         if isinstance(tutor, dict):
+    #             if tutor['status']:
+    #                 content = '您的导师是: ' + stu.tutor \
+    #                           + '\nemail:' + stu.tutor_mail \
+    #                           + '\n' + '=' * 18 + '\n'
+    #                 if tutor['same_tutor']:
+    #                     content = content + '导师与您相同的有:\n\n'
+    #                     info_list = []
+    #                     for i in tutor['same_tutor']:
+    #                         info_list.append(i['name'] + ' ' +
+    #                                          i['sex'] +
+    #                                          '\n宿舍: ' +
+    #                                          i['campus'])
+    #                     content = content + '\n\n'.join(info_list)
+    #                 else:
+    #                     content = content + '没有人和您有相同导师！'
+    #             else:
+    #                 content = '您当前没有导师！'
+    #         else:
+    #             content = tutor
+    #         return content
 
 
-    def transfer_url(nid):
-        url = ADDRESS + '/code/' + str(nid)
-        post_url = WxApiUrl.oauth2_new_page.format(appid=APP_ID, redirect_url=url)
-        return post_url
-
-    send_content = [(x['title'], '', x['picurl'], transfer_url(x['nid'])) for x in send_content if x['nid'] in not_read][:8]
-
-    if len(send_content) == 0:
-        head_str = news_rep_front % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), 1)
-        middle_str = news_rep_middle % ('当前没有未读消息哦～', '',
-                                        'http://www.nju.edu.cn/_upload/tpl/01/36/310/template310/images/logo.png',
-                                        'http://weixin.njunova.com')
-        return __res_news_msg(head_str+middle_str+news_rep_back)
-
-    middle_str=''
-
-    # 只返回前8条未读消息
-    for i in send_content:
-        middle_str += news_rep_middle % i
-
-    head_str = news_rep_front % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())),len(send_content))
-    content = head_str+middle_str+news_rep_back
-    return __res_news_msg(content)
+# def __handle_mes_key(msg, count=False, stu=False):  # 未读消息处理
+#     if stu:
+#         stuid = msg
+#     else:
+#         stuid = get_stuid(msg['FromUserName'])
+#
+#     send_info = select('select nid,stuids from noteindex')
+#     if not send_info:
+#         return ''
+#     # 发送给某学生的所有消息
+#     send = [j['nid'] for j in send_info if str(stuid) in j['stuids']]
+#     if not send:
+#         return ''
+#
+#     read_info = select('select nid,readlist from noteresponse')
+#     if not read_info:
+#         return ''
+#
+#     # 该学生已读的所有消息
+#     read = [i['nid'] for i in read_info if str(stuid) in i['readlist']]
+#
+#     not_read = list(set(send) - set(read))
+#     if not not_read:
+#         return ''
+#
+#     send_content = select(
+#         'select nid,title,picurl,url from notecontent order by nid desc limit 100')
+#     if count:
+#         temp = []
+#         for x in send_content:
+#             if x['nid'] in not_read:
+#                 temp.append({'title': x['title'], 'url': x['url']})
+#         return {'read': len(read),
+#                 'not_read': len(not_read),
+#                 'not_read_content': temp}
+#
+#     def transfer_url(nid):
+#         url = ADDRESS + '/code/' + str(nid)
+#         post_url = WxApiUrl.oauth2_new_page.format(appid=APP_ID, redirect_url=url)
+#         return post_url
+#
+#     send_content = [(x['title'], '', x['picurl'], transfer_url(x['nid'])) for x in send_content if
+#                     x['nid'] in not_read][:8]
+#
+#     if len(send_content) == 0:
+#         head_str = news_rep_front % (
+#             msg['FromUserName'], msg['ToUserName'], str(int(time.time())), 1)
+#         middle_str = news_rep_middle % ('当前没有未读消息哦～', '',
+#                                         'http://www.nju.edu.cn/_upload/tpl/01/36/310/template310/images/logo.png',
+#                                         'http://weixin.njunova.com')
+#         return __res_news_msg(head_str + middle_str + news_rep_back)
+#
+#     middle_str = ''
+#     for i in send_content:
+#         middle_str += news_rep_middle % i
+#
+#     head_str = news_rep_front % (
+#         msg['FromUserName'], msg['ToUserName'], str(int(time.time())), len(send_content))
+#     content = head_str + middle_str + news_rep_back
+#     return __res_news_msg(content)
 
 
 def __res_news_msg(content):
@@ -227,10 +254,11 @@ def __res_news_msg(content):
 
 
 def __res_text_msg(msg, content):
-    response = make_response(text_rep % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), content))
+    response = make_response(MsgFormat.text % (msg['FromUserName'], msg['ToUserName'],
+                                               str(int(time.time())), content))
     response.content_type = 'application/xml'
     return response
 
 
-def read_info(stuid):
-    return __handle_mes_key(str(stuid), True, True)
+# def read_info(stuid):
+#     return __handle_mes_key(str(stuid), True, True)

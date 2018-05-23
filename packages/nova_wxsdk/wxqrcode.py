@@ -1,17 +1,18 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 import json
 
-from . import WxApiUrl, CommunicateWithApi
 from nova_weixin.packages.novalog import NovaLog
+from . import WxApiUrl, CommunicateWithApi
 
-log = NovaLog('log/runtime.log')
+log = NovaLog('log/runtime')
 
 try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
+
 
 def create_ticket(action_name, acc_token, scene_id=0, expire_seconds=604800):
     if acc_token:
@@ -33,7 +34,8 @@ def create_ticket(action_name, acc_token, scene_id=0, expire_seconds=604800):
                         "scene": {"scene_id": scene_id}
                     }
             }
-        result = CommunicateWithApi.post_data(url, json.dumps(data, ensure_ascii=False).encode('utf8'))
+        result = CommunicateWithApi.post_data(url,
+                                              json.dumps(data, ensure_ascii=False).encode('utf8'))
         if result.get('errcode'):
             return {'status': -1, 'errcode': result.get('errcode'), 'errmsg': result.get('errmsg')}
         else:

@@ -1,4 +1,4 @@
-# -*- coding:utf8 -*-
+# -*- coding: utf-8 -*-
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 
@@ -41,9 +41,9 @@
              1. 事务也可以嵌套，内层事务会自动合并到外层事务中，这种事务模型足够满足99%的需求
 """
 
-import time
 import functools
 import threading
+import time
 
 # global engine object:
 engine = None
@@ -68,7 +68,7 @@ def create_engine(user, password, database, host='127.0.0.1', port=3306, **kw):
         raise DBError('Engine is already initialized.')
     params = dict(user=user, password=password, database=database, host=host, port=port)
     defaults = dict(use_unicode=True, charset='utf8', autocommit=False)
-    #若kw中添加了参数，就用kw中的，否则用默认的
+    # 若kw中添加了参数，就用kw中的，否则用默认的
     for k, v in defaults.items():
         params[k] = kw.pop(k, v)
     params.update(kw)
@@ -76,9 +76,11 @@ def create_engine(user, password, database, host='127.0.0.1', port=3306, **kw):
     engine = _Engine(lambda: pymysql.connect(**params))
     # test connection...
 
+
 def close_engine():
     global engine
     engine = None
+
 
 def connection():
     """
@@ -109,10 +111,12 @@ def with_connection(func):
             f2()
             f3()
     """
+
     @functools.wraps(func)
     def _wrapper(*args, **kw):
         with _ConnectionCtx():
             return func(*args, **kw)
+
     return _wrapper
 
 
@@ -141,12 +145,14 @@ def with_transaction(func):
         def do_in_transaction():
 
     """
+
     @functools.wraps(func)
     def _wrapper(*args, **kw):
         start = time.time()
         with _TransactionCtx():
             func(*args, **kw)
         _profiling(start)
+
     return _wrapper
 
 
@@ -286,7 +292,8 @@ def insert(table, **kw):
     """
     cols, args = zip(*kw.items())
     sql = "insert into `%s` (%s) values (%s)" % \
-          (table, ','.join(['`%s`' % col for col in cols]), ','.join(['?' for i in range(len(cols))]))
+          (table, ','.join(['`%s`' % col for col in cols]),
+           ','.join(['?' for i in range(len(cols))]))
     return _update(sql, *args)
 
 
@@ -295,6 +302,7 @@ class Dict(dict):
     字典对象
     实现一个简单的可以通过属性访问的字典，比如 x.key = value
     """
+
     def __init__(self, names=(), values=(), **kw):
         super(Dict, self).__init__(**kw)
         for k, v in zip(names, values):
@@ -323,6 +331,7 @@ class _Engine(object):
     数据库引擎对象
     用于保存 db模块的核心函数：create_engine 创建出来的数据库连接
     """
+
     def __init__(self, connect):
         self._connect = connect
 
@@ -335,6 +344,7 @@ class _LazyConnection(object):
     惰性连接对象
     仅当需要cursor对象时，才连接数据库，获取连接
     """
+
     def __init__(self):
         self.connection = None
 
@@ -363,6 +373,7 @@ class _DbCtx(threading.local):
     取得的连接是惰性连接对象，因此只有调用cursor对象时，才会真正获取数据库连接
     该对象是一个 Thread local对象，因此绑定在此对象上的数据 仅对本线程可见
     """
+
     def __init__(self):
         self.connection = None
         self.transactions = 0
@@ -408,11 +419,12 @@ class _ConnectionCtx(object):
         with connection():
             pass
     """
+
     def __enter__(self):
         """
         获取一个惰性连接对象
         """
-        #使用全局变量一定要加global
+        # 使用全局变量一定要加global
         global _db_ctx
         self.should_cleanup = False
         if not _db_ctx.is_init():
@@ -474,4 +486,5 @@ class _TransactionCtx(object):
 if __name__ == '__main__':
     create_engine('szy', '123456', 'weixin', 'localhost', charset='utf8')
     update('drop table if exists user')
-    update('create table user (id int primary key, name text, email text, passwd text, last_modified real)')
+    update(
+        'create table user (id int primary key, name text, email text, passwd text, last_modified real)')
