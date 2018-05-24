@@ -7,14 +7,14 @@
 import json
 import sys
 
-from nova_weixin.app.config import PY2
+from app.config import PY2
 
 if PY2:
     reload(sys)
     sys.setdefaultencoding('utf8')
 
-from nova_weixin.app.config import MENU, APP_ID, SECRET
-from nova_weixin.packages.nova_wxsdk import WxApiUrl, CommunicateWithApi, get_token
+from app.config import MENU, APP_ID, SECRET
+from packages.nova_wxsdk import WxApiUrl, CommunicateWithApi, get_token
 
 
 def create_menu():

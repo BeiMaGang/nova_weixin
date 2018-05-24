@@ -6,7 +6,7 @@ import os
 import sys
 import time
 
-from nova_weixin.app.config import PY2
+from app.config import PY2
 
 if PY2:
     reload(sys)

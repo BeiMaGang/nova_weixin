@@ -3,8 +3,8 @@
 # github: https://github.com/imndszy
 import json
 
-from nova_weixin.app.config import APP_ID, SECRET
-from nova_weixin.packages.nova_wxsdk import WxApiUrl, CommunicateWithApi, get_token
+from app.config import APP_ID, SECRET
+from packages.nova_wxsdk import WxApiUrl, CommunicateWithApi, get_token
 
 
 def send_customer_service_message_txt(touser,

@@ -3,7 +3,7 @@
 # github: https://github.com/imndszy
 from flask import render_template
 
-from nova_weixin.app.main import main
+from app.main import main
 
 
 @main.route('/')

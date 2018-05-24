@@ -4,8 +4,8 @@
 from flask import (render_template, redirect, url_for, session, flash, request)
 import random
 import time
-from nova_weixin.app.bind import bind
-from nova_weixin.app.bind.forms import RegisterForm, VerifyForm
+from app.bind import bind
+from app.bind.forms import RegisterForm, VerifyForm
 from sms import send_verify_code
 from wechatAccAPI import get_openid_from_code
 from app.config import APP_ID, SECRET
@@ -31,13 +31,14 @@ def phone_register():
     verify_form = VerifyForm()
     if register_form.submit.data and register_form.validate_on_submit():
         input_number = ''.join(str(i) for i in random.sample(range(0, 9), 4))
-        # if 'time' in session and time.time() - session['time'] < 60:
-        #     flash("Please resend verify code 60 seconds later")
-        # else:
-        session['time'] = time.time()
-        session['phone_number'] = register_form.phone_number.data
-        session['verify_code'] = input_number
-        print(send_verify_code(register_form.phone_number.data, input_number))
+        if 'time' in session and time.time() - session['time'] < 60:
+            flash("Please resend verify code 60 seconds later")
+        elif send_verify_code(register_form.phone_number.data, input_number):
+            session['time'] = time.time()
+            session['phone_number'] = register_form.phone_number.data
+            session['verify_code'] = input_number
+        else:
+            flash("Error occurs when sending verify code, try again later")
 
     elif verify_form.verify.data and verify_form.validate_on_submit():
 

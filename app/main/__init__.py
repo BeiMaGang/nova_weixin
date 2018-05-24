@@ -4,4 +4,4 @@
 from flask import Blueprint
 
 main = Blueprint('main', __name__)
-from nova_weixin.app.main import views, errors
+from app.main import views, errors

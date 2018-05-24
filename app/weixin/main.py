@@ -6,16 +6,9 @@ import xml.etree.ElementTree as ET
 
 from flask import request, make_response, render_template
 
-from nova_weixin.app.weixin import weixin
-from nova_weixin.app.weixin.msg_handler import handle_msg
-from nova_weixin.app.config import TOKEN
-
-
-# from nova_weixin.app.weixin.oauth_handler import (jiaowu,get_openid_from_code,
-#                                                   get_url,
-#                                                   jiaowu_save,history_articles)
-# from nova_weixin.app.nova.get_user_info import get_stu_name, get_stuid
-# from nova_weixin.app.config import PY2
+from app.weixin import weixin
+from app.weixin.msg_handler import handle_msg
+from app.config import TOKEN
 
 
 def parse(rec):
@@ -83,7 +76,6 @@ def index():
 #         url = get_url(nid)
 #         openid = get_openid_from_code(code)
 #         try:
-#             from nova_weixin.app.weixin.oauth_handler import openid_handler
 #             openid_handler(openid, nid)
 #         except:
 #             pass

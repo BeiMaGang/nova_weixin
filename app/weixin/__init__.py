@@ -4,4 +4,4 @@
 from flask import Blueprint
 
 weixin = Blueprint('weixin', __name__)
-from nova_weixin.app.weixin import main
+from app.weixin import main

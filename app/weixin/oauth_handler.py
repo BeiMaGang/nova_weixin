@@ -3,11 +3,9 @@
 # github: https://github.com/imndszy
 import time
 
-from nova_weixin.app.config import APP_ID, SECRET
-from nova_weixin.packages.nova_wxsdk import WxApiUrl, CommunicateWithApi
-from nova_weixin.packages.novalog import NovaLog
-# from nova_weixin.packages.novamysql import select_one, update, select_int, select
-# from nova_weixin.app.nova.get_user_info import get_stuid
+from app.config import APP_ID, SECRET
+from packages.nova_wxsdk import WxApiUrl, CommunicateWithApi
+from packages.novalog import NovaLog
 
 log = NovaLog('log/db_operation')
 

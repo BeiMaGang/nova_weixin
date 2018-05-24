@@ -4,11 +4,10 @@
 import sys
 import threading
 
-from nova_weixin.app.config import ADDRESS
-# from nova_weixin.app.nova.get_user_info import get_all_users
-from nova_weixin.app.config import APP_ID, SECRET, TEMPLATE_ID
-from nova_weixin.packages.nova_wxsdk import WxApiUrl, send_common_template_msg, get_token
-from nova_weixin.packages.novalog import NovaLog
+from app.config import ADDRESS
+from app.config import APP_ID, SECRET, TEMPLATE_ID
+from packages.nova_wxsdk import WxApiUrl, send_common_template_msg, get_token
+from packages.novalog import NovaLog
 
 PY2 = sys.version_info[0] == 2
 send_log = NovaLog(name='log/runtime')

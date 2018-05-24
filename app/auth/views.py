@@ -3,21 +3,12 @@
 # github: https://github.com/imndszy
 from flask import (render_template, redirect, url_for, flash, session)
 
-from nova_weixin.app.auth import auth
-from nova_weixin.app.auth.forms import LoginForm
-from nova_weixin.app.config import USER_EMAIL, USER_PASSWD
+from app.auth import auth
+from app.auth.forms import LoginForm
+from app.config import USER_EMAIL, USER_PASSWD
 
 
 # import time
-# from nova_weixin.app.auth.forms import LoginForm, ArticleForm
-# from nova_weixin.app.weixin.msg_handler import read_info
-# from nova_weixin.app.auth.get_users import classes, stu
-# from nova_weixin.app.auth.noteprocess import (note_index,
-#                                               note_content,
-#                                               note_response,
-#                                               get_read_info,
-#                                               get_activity_info)
-# from nova_weixin.packages.nova_admin import send
 
 
 @auth.route('/', methods=['GET', 'POST'])

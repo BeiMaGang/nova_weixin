@@ -3,7 +3,7 @@
 # github: https://github.com/imndszy
 import json
 
-from nova_weixin.packages.novalog import NovaLog
+from packages.novalog import NovaLog
 from . import WxApiUrl, CommunicateWithApi
 
 log = NovaLog('log/runtime')

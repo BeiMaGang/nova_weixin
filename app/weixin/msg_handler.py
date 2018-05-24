@@ -10,9 +10,6 @@ import time
 from urllib.parse import unquote
 from flask import make_response
 
-# from nova_weixin.app.config import ADDRESS
-# from nova_weixin.app.nova.get_user_info import get_stuid, Student
-# from nova_weixin.app.weixin.msg_format import *
 from wechatAccAPI import MsgFormat, Communicate
 from packages.novalog import NovaLog
 from novamysql import ServiceStatusForm, dbsession
@@ -34,11 +31,9 @@ log = NovaLog('log/db_operation')
 
 def handle_msg(msg):
     if msg['MsgType'] == 'text':
-        try:
-            return __res_text_msg(msg, __handle_text(msg))
-            # __save_into_database(msg['Content'], msg['FromUserName'])
-        except:
-            pass
+        res = __res_text_msg(msg, __handle_text(msg))
+        return res
+        # __save_into_database(msg['Content'], msg['FromUserName'])
 
     if msg['MsgType'] == 'event':
         # if msg['Event'] == 'CLICK' and msg['EventKey'] == 'not_read_mes':
@@ -67,7 +62,8 @@ def __handle_text(msg):
             'q': msg_text,
             'anid': openid
         }
-        reply = unquote(Communicate.get("http://www.xiaobing.tk/chat.php", params=params)
+        # old url: http://www.xiaobing.tk/chat.php
+        reply = unquote(Communicate.get("https://www4.bing.com/socialagent/chat", params=params)
                         ['InstantMessage']['ReplyText'])
     dbsession.commit()
     return reply

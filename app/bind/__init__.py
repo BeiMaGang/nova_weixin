@@ -4,4 +4,4 @@
 from flask import Blueprint
 
 bind = Blueprint('bind', __name__)
-from nova_weixin.app.bind import views
+from app.bind import views
