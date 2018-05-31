@@ -1,0 +1,31 @@
+{% extends "simple_base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Nova - Sign up{% endblock %}
+{% block page_content %}
+    <div class="page-header">
+        <h1>Sign up</h1>
+    </div>
+    <form method="post">
+    <div class="md-4 form-group">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.username) }}
+        {{ wtf.form_field(form.password) }}
+        <img src="data:image/jpg;base64,{{ img_stream }}">
+        {{ wtf.form_field(form.validate_code) }}
+        {{ wtf.form_field(form.submit) }}
+{#        <label for="inputUsername">Username</label>#}
+{#        <input type="text" class="form-control" id="inputUsername">#}
+{#        <br>#}
+{#        <label for="inputPassword">Password</label>#}
+{#        <input type="password" class="form-control" id="inputPassword">#}
+{#        <br>#}
+{#        <br><br>#}
+{#        <label for="inputValidateCode">Validate Code</label>#}
+{#        <input type="text" class="form-control" id="inputValidateCode">#}
+{#        <br>#}
+{#        <input type="submit" class="btn btn-default" name="submit" value="Submit">#}
+    </div>
+    </form>
+    <br>
+{% endblock %}

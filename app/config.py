@@ -10,8 +10,6 @@ from app.my_config import DB_NAME, DB_PASSWORD, DB_USERNAME, DB_HOSTNAME, DB_POR
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-PY2 = sys.version_info[0] == 2
-
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or OR_SECRET_KEY
@@ -72,13 +70,12 @@ MENU = {
                 },
                 {
                     "type": "view",
-                    "name": "校外用户绑定",
+                    "name": "用户绑定",
                     "url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&"
                            "redirect_uri={url}&response_type=code&scope=snsapi_base"
                            "#wechat_redirect".format(
                                                      appid=APP_ID,
-                                                     url="http://weixin.njunova.com/"
-                                                         "bind/phone_register"
+                                                     url="http://weixin.njunova.com/bind"
                            )
                 },
                 {
