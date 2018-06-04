@@ -8,27 +8,23 @@ from wtforms.validators import DataRequired, Regexp
 
 class RegisterForm(Form):
     phone_number = StringField(
-        'Phone Number', validators=[
+        '手机号码', validators=[
             DataRequired(), Regexp('^1[0-9]{10}$', message='必须为11位手机号码')
         ])
-    submit = SubmitField("Get Verify Code")
+    submit = SubmitField("获取短信验证码")
 
 
 class VerifyForm(Form):
     code = StringField(
-        'Verify Code', validators=[
-            DataRequired(), Regexp('^\d{4}$', message='请输入4位验证码')
+        '短信验证码', validators=[
+            DataRequired(), Regexp('^\d{4}$', message='请输入4位短信验证码')
         ])
-    verify = SubmitField('Sign Up')
+    verify = SubmitField('注册')
 
 
 class StuidForm(Form):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    validate_code = StringField('Validate Code', validators=[
+    username = StringField('用户名', validators=[DataRequired()])
+    password = PasswordField('密码', validators=[DataRequired()])
+    validate_code = StringField('验证码', validators=[
         DataRequired(), Regexp('^[a-zA-Z0-9]{4}$', message='请输入4位验证码')])
-    submit = SubmitField("Verify Login In")
-
-
-class EmptyForm(Form):
-    pass
+    submit = SubmitField("绑定用户")

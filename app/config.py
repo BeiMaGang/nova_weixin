@@ -5,8 +5,8 @@ import os
 import sys
 
 from app.my_config import DB_NAME, DB_PASSWORD, DB_USERNAME, DB_HOSTNAME, DB_PORT, ROOT_USER, \
-    USER_EMAIL, USER_PASSWD, ADDRESS, OR_SECRET_KEY, APP_ID, SECRET, TEMPLATE_ID, TOKEN,\
-    ACCESS_KEY_ID, ACCESS_KEY_SECRET
+    USER_EMAIL, USER_PASSWD, ADDRESS, OR_SECRET_KEY, APP_ID, SECRET, TEMPLATE_ID, TOKEN, \
+    SHORT_MESSAGE_ACCESS_ID, SHORT_MESSAGE_ACCESS_SECRET, TULING_API_KEYS
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -36,53 +36,27 @@ config = {
 MENU = {
     "button": [
         {
-            "name": "通知消息",
-            "sub_button": [
-                {
-                    "type": "click",
-                    "name": "未读消息",
-                    "key": "not_read_mes"
-                },
-                {
-                    "type": "view",
-                    "name": "历史消息",
-                    "url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
-                           "&redirect_uri=%s/history&response_type=code&scope=snsapi_base"
-                           "&state=123&connect_redirect=1#wechat_redirect"
-                           % (APP_ID, ADDRESS)
-                }
-                # ,
-                # {
-                #     "type": "click",
-                #     "name": "近期消息",
-                #     "key": "recent_mes"
-                # }
-            ]
-
+            "type": "view",
+            "name": "历史消息",
+            "url": "https://mp.weixin.qq.com/mp/profile_ext?action=home&"
+                   "__biz=MzA3OTUyMTAxMQ==&scene=124#wechat_redirect"
+        },
+        {
+            "type": "view",
+            "name": "用户绑定",
+            "url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&"
+                   "redirect_uri={url}&response_type=code&scope=snsapi_base"
+                   "#wechat_redirect".format(appid=APP_ID, url="http://weixin.njunova.com/bind")
         },
         {
             "name": "个性服务",
             "sub_button": [
                 {
                     "type": "view",
-                    "name": "微信问问（校内）",
+                    "name": "微信问问",
                     "url": "http://smeug.nju.edu.cn/q2a/index.php"
-                },
-                {
-                    "type": "view",
-                    "name": "用户绑定",
-                    "url": "https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&"
-                           "redirect_uri={url}&response_type=code&scope=snsapi_base"
-                           "#wechat_redirect".format(
-                                                     appid=APP_ID,
-                                                     url="http://weixin.njunova.com/bind"
-                           )
-                },
-                {
-                    "type": "view",
-                    "name": "主页",
-                    "url": "http://weixin.njunova.com"
                 }
+
             ]
 
         }

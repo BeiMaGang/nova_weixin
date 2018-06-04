@@ -1,6 +1,6 @@
-{% extends "simple_base.html" %}
+{% extends "nova_base.html" %}
 
-{% block title %}Bind{% endblock %}
+{% block title %}Nova - Bind{% endblock %}
 
 {% block page_content %}
     <div class="page-header">
@@ -9,10 +9,10 @@
     <div>
     <form method="post">
 {#        <a class="btn btn-primary btn-lg" href={{ url_for('bind.default') }}>校内学生</a>#}
-        <input class="btn btn-primary btn-lg" type="submit" name="in" value="校内绑定">
-        <br><br>
+        <input class="btn btn-primary btn-lg btn-block" type="submit" name="in" value="校内绑定">
+        <br>
 {#        <a class="btn btn-success btn-lg" href={{ url_for('bind.phone_register') }}>校外人员</a>#}
-        <input class="btn btn-success btn-lg" type="submit" name="out" value="校外注册">
+        <input class="btn btn-success btn-lg btn-block" type="submit" name="out" value="校外注册">
         </form>
     </div>
 {% endblock %}

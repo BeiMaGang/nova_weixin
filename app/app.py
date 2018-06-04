@@ -10,9 +10,7 @@ from packages.utils.sql import engine
 from app.config import (config, DB_HOSTNAME, DB_PASSWORD, DB_USERNAME,
                         DB_NAME, DB_PORT, MENU, APP_ID, SECRET)
 from packages.utils.wechatAccAPI import Url, Communicate, AccessToken
-from packages.utils.log import NovaLog
 
-logger = NovaLog("app_app")
 bootstrap = Bootstrap()
 moment = Moment()
 

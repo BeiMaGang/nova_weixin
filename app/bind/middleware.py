@@ -4,8 +4,8 @@ Created by suun on 5/29/2018
 """
 import base64
 import requests
-from PIL import Image
-from io import BytesIO
+from packages.utils.wechatAccAPI import send_template_msg, TemplateFormat
+from datetime import datetime
 
 request_header = {
     'Host': 'cer.nju.edu.cn',
@@ -45,3 +45,9 @@ def verify_login(cookies, username, password, validate_code):
         return {'status': 1}
     else:
         return {'status': 0, 'errmsg': 'error that not handled occurs.'}
+
+
+def send_bind_template_msg(appid, secret, touser, account):
+    dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    params = TemplateFormat.bind.format(touser=touser, account=account, time=dt)
+    return send_template_msg(appid=appid, secret=secret, data=params)

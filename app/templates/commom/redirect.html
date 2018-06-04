@@ -1,13 +1,13 @@
-{% extends "simple_base.html" %}
+{% extends "nova_base.html" %}
 
-{% block title %}Redirect{% endblock %}
+{% block title %}Nova - Redirect{% endblock %}
 
 {% block page_content %}
     <div>
-        <a class="btn btn-success btn-lg" href={{ params['success']['href'] }}>{{ params['success']['value'] }}</a>
+        <a class="btn btn-success btn-lg btn-block" href={{ params['success']['href'] }}>{{ params['success']['value'] }}</a>
 {#        <input class="btn btn-default btn-lg" type="submit" name="in" value="校内绑定">#}
-        <br><br>
-        <a class="btn btn-warning btn-lg" href={{ params['fail']['href'] }}>{{ params['fail']['value'] }}</a>
+        <br>
+        <a class="btn btn-warning btn-lg btn-block" href={{ params['fail']['href'] }}>{{ params['fail']['value'] }}</a>
 {#        <input class="btn btn-default btn-lg" type="submit" name="out" value="校外注册">#}
     </div>
 {% endblock %}

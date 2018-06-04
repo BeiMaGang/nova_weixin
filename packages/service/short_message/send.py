@@ -9,7 +9,7 @@ import json
 import uuid
 import urllib.parse
 import requests
-from app.config import ACCESS_KEY_ID, ACCESS_KEY_SECRET
+from app.config import SHORT_MESSAGE_ACCESS_ID, SHORT_MESSAGE_ACCESS_SECRET
 
 
 def quote(text):
@@ -98,7 +98,7 @@ class AliSMS(object):
         }
 
 
-sms = AliSMS(ACCESS_KEY_ID, ACCESS_KEY_SECRET, "智能数据决策工作室")
+sms = AliSMS(SHORT_MESSAGE_ACCESS_ID, SHORT_MESSAGE_ACCESS_SECRET, "智能数据决策工作室")
 
 
 def send_verify_code(phone_number, verify_code):

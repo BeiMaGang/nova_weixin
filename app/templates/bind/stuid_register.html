@@ -1,10 +1,10 @@
-{% extends "simple_base.html" %}
+{% extends "nova_base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}Nova - Sign up{% endblock %}
 {% block page_content %}
     <div class="page-header">
-        <h1>Sign up</h1>
+        <h2>绑定 南大统一身份认证</h2>
     </div>
     <form method="post">
     <div class="md-4 form-group">
@@ -12,6 +12,7 @@
         {{ wtf.form_field(form.username) }}
         {{ wtf.form_field(form.password) }}
         <img src="data:image/jpg;base64,{{ img_stream }}">
+        <br><br>
         {{ wtf.form_field(form.validate_code) }}
         {{ wtf.form_field(form.submit) }}
 {#        <label for="inputUsername">Username</label>#}
@@ -27,5 +28,4 @@
 {#        <input type="submit" class="btn btn-default" name="submit" value="Submit">#}
     </div>
     </form>
-    <br>
 {% endblock %}

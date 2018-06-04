@@ -11,7 +11,7 @@ from packages.utils.wechatAccAPI import get_openid_from_code
 from app.config import APP_ID, SECRET
 # from packages.commom.sql import PhoneBindForm, dbsession, StudentIdBindForm
 from packages.utils import sql
-from .middleware import get_base_img, verify_login
+from .middleware import get_base_img, verify_login, send_bind_template_msg
 
 
 @bind.route('/', methods=['POST', 'GET'])
@@ -23,7 +23,7 @@ def default():
         if 'openid' not in session:
             session['openid'] = get_openid_from_code(code, appid=APP_ID, secret=SECRET)
             if not session['openid']:
-                flash("Error occurs while getting openid.")
+                flash("获取 openid 出错。")
                 return render_template('bind/bind.html')
         if 'in' in request.form:
             if len(sql.StudentIdBindForm.query.filter_by(openid=session['openid']).all()) > 0:
@@ -57,15 +57,16 @@ def stuid_register():
                 founds[0].username = username
                 founds[0].password = password
             else:
-                sql.dbsession.add(sql.StudentIdBindForm(openid=session['openid'],
-                                                        username=username,
-                                                        password=password))
+                sql.dbsession.add(
+                    sql.StudentIdBindForm(openid=session['openid'],
+                                          username=username, password=password))
             sql.dbsession.commit()
             session.pop('validate_code_cookies')
-            return render_template('bind/binded.html')
+            return redirect(url_for('bind.binded', username=username))
         else:
             flash(ret['errmsg'])
     session['validate_code_cookies'], img_stream = get_base_img()
+    flash('您的密码仅用于此次验证，不会被保存。')
     return render_template('bind/stuid_register.html', img_stream=img_stream, form=stuid_form)
 
 
@@ -76,22 +77,26 @@ def phone_register():
 
     register_form = RegisterForm()
     verify_form = VerifyForm()
+
+    # 请求短信验证码
     if register_form.submit.data and register_form.validate_on_submit():
         input_number = ''.join(str(i) for i in random.sample(range(0, 9), 4))
         if 'time' in session and time.time() - session['time'] < 60:
-            flash("Please resend verify code 60 seconds later")
+            flash("请在 60 秒后再次请求发送短信验证码。")
         elif send_verify_code(register_form.phone_number.data, input_number):
             session['time'] = time.time()
             session['phone_number'] = register_form.phone_number.data
             session['verify_code'] = input_number
         else:
-            flash("Error occurs when sending verify code, try again later")
+            flash("发送验证码出错，请稍后重试。")
 
+    # 验证短信验证码
     elif verify_form.verify.data and verify_form.validate_on_submit():
 
         if 'verify_code' not in session:
-            flash("You have not got verify code")
+            flash("您还未获取短信验证码。")
         elif str(verify_form.code.data) == session['verify_code']:
+
             founds = sql.PhoneBindForm.query.filter_by(openid=session['openid']).all()
             if len(founds) > 0:
                 founds[0].phone_number = session['phone_number']
@@ -99,18 +104,36 @@ def phone_register():
                 sql.dbsession.add(sql.PhoneBindForm(phone_number=session['phone_number'],
                                                     openid=session['openid']))
             sql.dbsession.commit()
+
             session.pop('verify_code')
-            return render_template('bind/binded.html')
+            session.pop('time')
+            session.pop('phone_number')
+            return redirect(url_for('bind.binded', username=session['phone_number']))
         else:
-            flash("Your verify code is wrong")
+            flash("验证码错误。")
 
     return render_template('bind/phone_register.html',
                            register_form=register_form, verify_form=verify_form)
 
 
+@bind.route('/binded')
+def binded():
+    print(session)
+    if 'openid' not in session:
+        return redirect(url_for('bind.wrong_source'))
+
+    username = request.args.get('username', None)
+    print(request.args)
+    if username:
+        send_bind_template_msg(appid=APP_ID, secret=SECRET,
+                               account=username, touser=session['openid'])
+    session.pop('openid')
+    return render_template('commom/blank.html', title='Nova - Success', content='绑定成功。')
+
+
 @bind.route('/wrong_source')
 def wrong_source():
-    return render_template('commom/blank.html', title='Error', content='请从微信打开此页面。')
+    return render_template('commom/blank.html', title='Nova - Error', content='请从微信打开此页面。')
 
 
 @bind.route('/redirect_rebind')
@@ -121,13 +144,13 @@ def redirect_rebind():
     params = {
         'success': {
             'href': url_for(target),
-            'value': 'Confirm'
+            'value': '继续'
         },
         'fail': {
-            'href': url_for('bind.default'),
-            'value': 'Cancel'
+            'href': url_for('bind.binded'),
+            'value': '取消'
         }
     }
-    flash('You have bind before, click confirm to continue')
+    flash('你已绑定过，请点击\"继续\"修改绑定信息。')
     return render_template('commom/redirect.html',
                            params=params)

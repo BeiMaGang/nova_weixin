@@ -88,7 +88,7 @@ class TemplateFormat(object):
         "topcolor": "#FF0000",
         "data": {{
             "first": {{
-                "value": "您已成功绑定手机号码",
+                "value": "您已成功绑定。",
                 "color": "#173177"
             }},
             "keyword1": {{

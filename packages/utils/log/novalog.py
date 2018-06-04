@@ -4,43 +4,24 @@
 import logging
 
 
-class NovaLog(object):
-    def __init__(self, name, level=logging.DEBUG):
-        self.logger = logging.getLogger(name)
-        self.logger.setLevel(logging.DEBUG)
-        fmt = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s',
-                                datefmt='%Y-%m-%d %H:%M:%S')
+def get_logger(name, _level=logging.DEBUG,
+               _format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+               _data_format="%y-%m-%d %H:%M:%S"):
+    logger = logging.getLogger(name)
+    logger.setLevel(_level)
+    if not len(logger.handlers):
+        formatter = logging.Formatter(fmt=_format,
+                                      datefmt=_data_format)
 
-        fh = logging.FileHandler('log/' + name + '.log')
-        fh.setFormatter(fmt)
-        fh.setLevel(logging.DEBUG)
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(formatter)
+        stream_handler.setLevel(_level)
 
-        sh = logging.StreamHandler()
-        sh.setFormatter(fmt)
-        sh.setLevel(level)
-        self.logger.addHandler(fh)
-        self.logger.addHandler(sh)
+        file_handler = logging.FileHandler(filename='log/%s.log' % name)
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(_level)
 
-    def debug(self, message):
-        self.logger.debug(message)
+        logger.addHandler(stream_handler)
+        logger.addHandler(file_handler)
 
-    def info(self, message):
-        self.logger.info(message)
-
-    def warning(self, message):
-        self.logger.warning(message)
-
-    def error(self, message):
-        self.logger.error(message)
-
-    def critical(self, message):
-        self.logger.critical(message)
-
-
-if __name__ == '__main__':
-    log = NovaLog('weixin', logging.DEBUG)
-    log.debug('一个debug信息')
-    log.info('一个info信息')
-    log.warning('一个warning信息')
-    log.error('一个error信息')
-    log.critical('一个致命critical信息')
+    return logger

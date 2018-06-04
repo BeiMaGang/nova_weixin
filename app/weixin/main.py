@@ -4,17 +4,11 @@
 import hashlib
 import xml.etree.ElementTree as ET
 
-from flask import request, make_response, render_template, redirect, url_for
+from flask import request, make_response, render_template
 
 from app.weixin import weixin
 from app.config import TOKEN
 from .entrance import handle_msg
-
-
-@weixin.errorhandler(404)
-def page_not_found(e):
-    # note that we set the 404 status explicitly
-    return render_template('error/404.html'), 404
 
 
 def parse(rec):
