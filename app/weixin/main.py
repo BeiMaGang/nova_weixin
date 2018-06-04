@@ -2,7 +2,7 @@
 # Author: shizhenyu96@gamil.com
 # github: https://github.com/imndszy
 import hashlib
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 
 from flask import request, make_response, render_template
 
@@ -16,7 +16,7 @@ def parse(rec):
     :param rec: rec is a xml file
     :return: return a dictionary
     """
-    root = ET.fromstring(rec)
+    root = ElementTree.fromstring(rec)
     msg = {}
     for child in root:
         msg[child.tag] = child.text
